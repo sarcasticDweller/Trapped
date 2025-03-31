@@ -1,4 +1,7 @@
+# python libraries
 import random, os, math
+# project libraries
+import ui as ttui
 
 #List library
 rooms=[
@@ -8,12 +11,15 @@ rooms=[
 15, 16, 17, 18, 19,
 20, 21, 22, 23, 24
 ]
-"""Rooms grid for ease of access:
-    24 23 22 21 20
-    19 18 17 16 15
-    14 13 12 11 10
-    9  8  7  6  5
-    4  3  2  1  0"""
+"""
+Rooms grid for ease of access:
+24 23 22 21 20
+19 18 17 16 15
+14 13 12 11 10
+9  8  7  6  5
+4  3  2  1  0
+"""
+
 #Note: moods[0] MUST be a volatile mood.
 #Note: moods[2] MUST be a passive mood.
 moods=["cranky", "mellow", "asleep"]
@@ -37,44 +43,58 @@ down=""
 left=""
 right=""
 na="na"
-"""Status meanings:
-    0= Time out
-    1= Dead to non-loon-entity
-    2= Dead to loon
-    3= Victory
-    4= Game playing"""
+"""
+Status meanings:
+0= Time out
+1= Dead to non-loon-entity
+2= Dead to loon
+3= Victory
+4= Game playing
+"""
 status=4
 #Function declarations
 def lines():
     print("//////////////////////////////////")
+
 def moveRoom():
     #Moves the player since it doesn't work well in the main loop
     global player_room #Prevents an error. :/
     #Because borders freak Python out this is here.
 
-    # this is deceptively clever. the player space is a linear list, but this gives the player agency to jump to points along the list. i love this concept, but it could be made more modular. this only works in a 5^2 list.
+
+    options = []
     try:
         up=str(rooms[player_room+5])
+        options.append("up")
     except:
         up=na
     try:
         down=str(rooms[player_room-5])
+        options.append("down")
     except:
         down=na
     try:
         left=str(rooms[player_room-1])
+        options.append("left")
     except:
         left=na
     try:
         right=str(rooms[player_room+1])
+        options.append("right")
     except:
         right=na
-    print("You can do these actions:")
-    print("Go up   : " + up)
-    print("Go down : " + down)
-    print("Go left : " + left)
-    print("Go right: " + right)
-    print("Or wait : [.]")
+    
+    direction_chosen = ttui.list_menu("Which way would you like to go?", options)
+    if direction_chosen == "up":
+        player_room = rooms[int(up)]
+    if direction_chosen == "down":
+        player_room = rooms[int(down)]
+    if direction_chosen == "left":
+        player_room = rooms[int(left)]
+    if direction_chosen == "right":
+        player_room = rooms[int(right)]
+
+    '''
     while True:
         answer=input(":: ")
         if answer==up or answer==down or answer==left or answer==right:
@@ -89,6 +109,8 @@ def moveRoom():
             break
         else:
             print("That's not a valid answer.")
+    '''
+
 def clear_screen():
     # clears the screen
     try:
@@ -106,6 +128,7 @@ def ui():
     print("Room      : " + str(player_room))
     print("Turns left: " + str(turns_left))
     lines()
+
 def detectLoon():
     """Return value meanings:
         0=not near
@@ -133,6 +156,7 @@ def detectLoon():
         return 2
     else:
         return 0
+
 def detectBats():
     """Return value meanings:
         0=not near
@@ -151,6 +175,7 @@ def detectBats():
         return 1
     else:
         return 0
+
 def get_random_flavor_text():
     statements=["You know he's here somewhere...",
                 "He's not in this room.", 
@@ -158,11 +183,13 @@ def get_random_flavor_text():
                 "If I give up now I'll never escape."
     ]
     return statements[random.randint(0, len(statements)-1)]
+
 def loonMood():
     #Handles the randomization of the loon's mood.
     global loon_mood
     if turns_left%2==0:
         loon_mood=moods[random.randint(0, len(moods)-1)]
+
 def moveLoon(): #Broken. Loon went from 0-20 then it broke when I tried to go to 0 to attempt that.
     global loon_room
     global loon_room_prev
@@ -205,7 +232,8 @@ def moveLoon(): #Broken. Loon went from 0-20 then it broke when I tried to go to
             loon_room=rooms[int(loon_room)+6] #6 to move up/down then left/right once each
         except:
             loon_room=rooms[int(loon_room)-6]
-        turns_not_mocing=0
+        turns_not_moving=0
+
 def game_over(status):
     #Prints game-over messages
 
@@ -220,8 +248,6 @@ def game_over(status):
         print("Inside his straight jacket you find a key.")
         print("Maybe there's a chance you might leave someday.")
 
-def pause():
-    pause=input("Press enter to continue...")
 
 def print_debug_display():
     lines()
@@ -241,46 +267,42 @@ while True:
     lines()
     print("Trapped")
     lines()
-    answer=input("Play?\nYes: 1\nNo : 2\n(Enter one)\n:: ")
-    if answer=="1":
+    answer = ttui.list_menu("Play?", ["Yes", "No"])
+    if answer == "No":
+        quit
+    if answer == "Yes":
         clear_screen()
-        clear_screen()
-        while True:
-            if debug==1:
-                print_debug_display()
-            ui()
-            if detectLoon()==0:
-                print(get_random_flavor_text())
-            elif detectLoon()==1:
-                print("He's close.")
-                print("He sounds as if he's " + loon_mood + ".")
-            elif detectLoon()==2:
-                print("You hear the loon.")
-            elif detectLoon()==3:
-                if loon_mood==moods[0]:
-                    clear_screen()
-                    status=2
-                    break
-                else:
-                    clear_screen()
-                    status=3
-            if detectBats()==1:
-                print("You hear rustling.")
-            elif detectBats()==2:
-                print("You've awakened the bats.")
-                player_room=rooms[random.randint(0, len(rooms)-1)]
-                bats_room=rooms[random.randint(0, len(rooms)-1)]
-            moveRoom()
-            loonMood()
-            moveLoon()
-            clear_screen()
-            if turns_left<1:
-                status=0
+    while True:
+        if debug==1:
+            print_debug_display()
+        ui()
+        if detectLoon()==0:
+            print(get_random_flavor_text())
+        elif detectLoon()==1:
+            print("He's close.")
+            print("He sounds as if he's " + loon_mood + ".")
+        elif detectLoon()==2:
+            print("You hear the loon.")
+        elif detectLoon()==3:
+            if loon_mood==moods[0]:
+                clear_screen()
+                status=2
                 break
+            else:
+                clear_screen()
+                status=3
+        if detectBats()==1:
+            print("You hear rustling.")
+        elif detectBats()==2:
+            print("You've awakened the bats.")
+            player_room=rooms[random.randint(0, len(rooms)-1)]
+            bats_room=rooms[random.randint(0, len(rooms)-1)]
+        moveRoom()
+        loonMood()
+        moveLoon()
         clear_screen()
-        game_over(status)
-    elif answer=="2":
-        break
-    else:
-        print("Invalid.")
-        pause()
+        if turns_left<1:
+            status=0
+            break
+    clear_screen()
+    game_over(status)
