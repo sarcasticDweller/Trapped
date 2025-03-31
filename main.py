@@ -1,11 +1,12 @@
-import random
+import random, os, math
+
 #List library
 rooms=[
 0,  1, 2, 3, 4,
 5, 6, 7, 8, 9,
 10, 11, 12, 13, 14,
 15, 16, 17, 18, 19,
-20, 21, 22, 23, 24,
+20, 21, 22, 23, 24
 ]
 """Rooms grid for ease of access:
     24 23 22 21 20
@@ -18,7 +19,7 @@ rooms=[
 moods=["cranky", "mellow", "asleep"]
 choices=[]
 #Room declarations
-player_room=rooms[(len(rooms)-1)/2] #Should always be 12.
+player_room=rooms[math.floor((len(rooms)-1)/2)] # should always be 12
 while True:
     loon_room=rooms[random.randint(0, len(rooms)-1)]
     if loon_room!=player_room:
@@ -86,10 +87,15 @@ def moveRoom():
             break
         else:
             print("That's not a valid answer.")
-def cls():
-    #Clears screen but makes lag.
-    for i in range(100):
-        print("\n")
+def clear_screen():
+    # clears the screen
+    try:
+        # assuming we're running a linux/mac
+        os.system("clear")
+    except:
+        # we must be on windows
+        os.system("cls")
+
 def ui():
     #Presents the user with their stats.
     global turns_left
@@ -212,29 +218,33 @@ def gameOver():
         print("Maybe there's a chance you might leave someday.")
 def pause():
     pause=input("Press enter to continue...")
+
+def print_debug_display():
+    lines()
+    print("Debug Display")
+    print("Player room     : " + str(player_room))
+    print("Loon room       : " + str(loon_room))
+    print("Loon mood       : " + str(loon_mood))
+    print("Loon choices    : " + str(choices))
+    print("Turns not moving: " + str(turns_not_moving))
+    print("Bats room       : " + str(bats_room))
+    print("Status          : " + str(status))
+    lines()
+
 #Main loop
 while True:
-    cls()
-    cls()
+    clear_screen()
+    clear_screen()
     print("Trapped")
     lines()
     lines()
     answer=input("Play?\nYes: 1\nNo : 2\n(Enter one)\n:: ")
     if answer=="1":
-        cls()
-        cls()
+        clear_screen()
+        clear_screen()
         while True:
             if debug==1:
-                lines()
-                print("Debug Display")
-                print("Player room     : " + str(player_room))
-                print("Loon room       : " + str(loon_room))
-                print("Loon mood       : " + str(loon_mood))
-                print("Loon choices    : " + str(choices))
-                print("Turns not moving: " + str(turns_not_moving))
-                print("Bats room       : " + str(bats_room))
-                print("Status          : " + str(status))
-                lines()
+                print_debug_display()
             ui()
             if detectLoon()==0:
                 print(loonFreeRoomRandomStatement())
@@ -245,11 +255,11 @@ while True:
                 print("You hear the loon.")
             elif detectLoon()==3:
                 if loon_mood==moods[0]:
-                    cls()
+                    clear_screen()
                     status=2
                     break
                 else:
-                    cls()
+                    clear_screen()
                     status=3
             if detectBats()==1:
                 print("You hear rustling.")
@@ -260,11 +270,11 @@ while True:
             moveRoom()
             loonMood()
             moveLoon()
-            cls()
+            clear_screen()
             if turns_left<1:
                 status=0
                 break
-        cls()
+        clear_screen()
         gameOver()
     elif answer=="2":
         break
