@@ -51,6 +51,8 @@ def moveRoom():
     #Moves the player since it doesn't work well in the main loop
     global player_room #Prevents an error. :/
     #Because borders freak Python out this is here.
+
+    # this is deceptively clever. the player space is a linear list, but this gives the player agency to jump to points along the list. i love this concept, but it could be made more modular. this only works in a 5^2 list.
     try:
         up=str(rooms[player_room+5])
     except:
@@ -98,7 +100,7 @@ def clear_screen():
 
 def ui():
     #Presents the user with their stats.
-    global turns_left
+    global turns_left # this should be a parameter, not a global variable declared in a function
     turns_left-=1
     lines()
     print("Room      : " + str(player_room))
@@ -149,10 +151,11 @@ def detectBats():
         return 1
     else:
         return 0
-def loonFreeRoomRandomStatement():
+def get_random_flavor_text():
     statements=["You know he's here somewhere...",
-    "He's not in this room.", "I will find him soon.",
-    "If I give up now I'll never escape."
+                "He's not in this room.", 
+                "I will find him soon.",
+                "If I give up now I'll never escape."
     ]
     return statements[random.randint(0, len(statements)-1)]
 def loonMood():
@@ -203,7 +206,7 @@ def moveLoon(): #Broken. Loon went from 0-20 then it broke when I tried to go to
         except:
             loon_room=rooms[int(loon_room)-6]
         turns_not_mocing=0
-def gameOver():
+def game_over(status):
     #Prints game-over messages
 
     if status==0:
@@ -216,6 +219,7 @@ def gameOver():
         print("You manage to kill the loon.")
         print("Inside his straight jacket you find a key.")
         print("Maybe there's a chance you might leave someday.")
+
 def pause():
     pause=input("Press enter to continue...")
 
@@ -234,9 +238,8 @@ def print_debug_display():
 #Main loop
 while True:
     clear_screen()
-    clear_screen()
-    print("Trapped")
     lines()
+    print("Trapped")
     lines()
     answer=input("Play?\nYes: 1\nNo : 2\n(Enter one)\n:: ")
     if answer=="1":
@@ -247,7 +250,7 @@ while True:
                 print_debug_display()
             ui()
             if detectLoon()==0:
-                print(loonFreeRoomRandomStatement())
+                print(get_random_flavor_text())
             elif detectLoon()==1:
                 print("He's close.")
                 print("He sounds as if he's " + loon_mood + ".")
@@ -275,7 +278,7 @@ while True:
                 status=0
                 break
         clear_screen()
-        gameOver()
+        game_over(status)
     elif answer=="2":
         break
     else:
