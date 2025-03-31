@@ -38,6 +38,9 @@ def list_menu(prompt = "", options = []):
     '''
     Takes a list
 
+    :param prompt: Description of menu
+    :param options: Menu items
+    :return: Returns option selected
     Returns an item from a list provided
     '''
 
