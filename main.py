@@ -3,27 +3,55 @@ import random, os, math
 # project libraries
 import ui as ttui
 
-#List library
 rooms=[
-0,  1, 2, 3, 4,
-5, 6, 7, 8, 9,
-10, 11, 12, 13, 14,
-15, 16, 17, 18, 19,
-20, 21, 22, 23, 24
+    0,  1, 2, 3, 4,
+    5, 6, 7, 8, 9,
+    10, 11, 12, 13, 14,
+    15, 16, 17, 18, 19,
+    20, 21, 22, 23, 24
 ]
+
+left_modifier = -1
+right_modifier = 1
+up_modifier = -math.sqrt(len(rooms))
+down_modifier = math.sqrt(len(rooms))
+
+def get_directions_entity_can_move(current_room):
+    options = []
+    if current_room + left_modifier >= 0:
+        options.append("left")
+    if current_room + right_modifier <= len(rooms):
+        options.append("right")
+    if current_room + up_modifier >= 0:
+        options.append("up")
+    if current_room + down_modifier <= len(rooms):
+        options.append("down")
+    return options
+
+def get_room_entity_moved_to(current_room, option):
+    new_room = current_room
+    if option == "left":
+        new_room += left_modifier
+    if option == "right":
+        new_room += right_modifier
+    if option == "up":
+        new_room += up_modifier
+    if option == "down":
+        new_room += down_modifier
+    return new_room
+
+        
+
+
+moods=["cranky", "mellow", "asleep"]
 """
-Rooms grid for ease of access:
-24 23 22 21 20
-19 18 17 16 15
-14 13 12 11 10
-9  8  7  6  5
-4  3  2  1  0
+cranky: lethal & mobile
+mellow: passive & mobile
+asleep: passive & immobile
 """
 
-#Note: moods[0] MUST be a volatile mood.
-#Note: moods[2] MUST be a passive mood.
-moods=["cranky", "mellow", "asleep"]
-choices=[]
+choices=[] # possibly useless?
+
 #Room declarations
 player_room=rooms[math.floor((len(rooms)-1)/2)] # should always be 12
 while True:
@@ -36,7 +64,7 @@ turns_not_moving=0
 loon_mood=moods[random.randint(0, len(moods)-1)]
 #Variable declarations
 turns_left=50 #Default is 50
-debug=0 #1 for debug
+debug = 1#1 for debug
 answer="12"
 up=""
 down=""
@@ -61,55 +89,10 @@ def moveRoom():
     global player_room #Prevents an error. :/
     #Because borders freak Python out this is here.
 
-
-    options = []
-    try:
-        up=str(rooms[player_room+5])
-        options.append("up")
-    except:
-        up=na
-    try:
-        down=str(rooms[player_room-5])
-        options.append("down")
-    except:
-        down=na
-    try:
-        left=str(rooms[player_room-1])
-        options.append("left")
-    except:
-        left=na
-    try:
-        right=str(rooms[player_room+1])
-        options.append("right")
-    except:
-        right=na
-    
+    options = get_directions_entity_can_move(player_room)
     direction_chosen = ttui.list_menu("Which way would you like to go?", options)
-    if direction_chosen == "up":
-        player_room = rooms[int(up)]
-    if direction_chosen == "down":
-        player_room = rooms[int(down)]
-    if direction_chosen == "left":
-        player_room = rooms[int(left)]
-    if direction_chosen == "right":
-        player_room = rooms[int(right)]
+    player_room = get_room_entity_moved_to(player_room, direction_chosen)
 
-    '''
-    while True:
-        answer=input(":: ")
-        if answer==up or answer==down or answer==left or answer==right:
-            if answer!=na:
-                player_room=rooms[int(answer)]
-                break
-            else:
-                print("You feel the soft cushioning on the wall. There\nare gash marks in one of the cushions.")
-                print("Alas, you must pick a different direction.")
-        elif answer==".":
-            player_room=player_room
-            break
-        else:
-            print("That's not a valid answer.")
-    '''
 
 def clear_screen():
     # clears the screen
@@ -191,37 +174,20 @@ def loonMood():
         loon_mood=moods[random.randint(0, len(moods)-1)]
 
 def moveLoon(): #Broken. Loon went from 0-20 then it broke when I tried to go to 0 to attempt that.
-    global loon_room
-    global loon_room_prev
-    global choices
-    global turns_not_moving
-    choices=[]
+    global loon_room       # oh
+    global loon_room_prev  # my
+    global choices         # god
+    global turns_not_moving# why
     loon_room_prev=loon_room
     if loon_mood!=moods[2]:
         #Generates choices
-        try:
-            choices.append(str(rooms[loon_room+5]))
-        except:
-            choices.append(na)
-        try:
-            choices.append(str(rooms[loon_room-5]))
-        except:
-            choices.append(na)
-        try:
-            choices.append(str(rooms[loon_room-1]))
-        except:
-            choices.append(na)
-        try:
-            choices.append(str(rooms[loon_room+1]))
-        except:
-            choices.append(na)
-        for i in range(choices.count(na)):
-            choices.remove(na)
+        choices = get_directions_entity_can_move(loon_room)
         #Loon picks a room
-        try:
-            loon_room=choices[random.randint(0, len(choices)-1)]
-        except:
-            loon_room=loon_room
+        loon_room_picked = choices[random.randint(0, len(choices)-1)]
+        loon_room = get_room_entity_moved_to(loon_room, loon_room_picked)
+        
+
+
     #Nudges the loon if he gets stuck for too long
     if loon_room_prev==loon_room:
         turns_not_moving+=1
@@ -229,6 +195,7 @@ def moveLoon(): #Broken. Loon went from 0-20 then it broke when I tried to go to
         turns_not_moving=0
     if turns_not_moving>=3:
         try:
+            # why six? this is arbitrary.
             loon_room=rooms[int(loon_room)+6] #6 to move up/down then left/right once each
         except:
             loon_room=rooms[int(loon_room)-6]
