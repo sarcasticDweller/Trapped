@@ -1,19 +1,7 @@
 # A unified input system
-# Copied from https://github.com/sarcasticDweller/Hanatokei/blob/main/ui.py
+# Some code borrowed from https://github.com/sarcasticDweller/Hanatokei/blob/main/ui.py
+import os
 
-'''
-# About
-Uses buttons to navigate menus
-
-These are designed for the command line and do not as of *yet* account for the final UI.
-
-# Types of menus 
-- Lists: list_menu(prompt, options)
-- Number selections: int_menu(prompt, start_value) 
-- Wait for input: wait_for_button_press()
-'''
-
-tui_prompt = "<<: 1; enter: 2; >>: 3" # unused
 
 print("""==============================
 Thank you for using the UI module.
@@ -26,6 +14,21 @@ In this current state, the module uses number keys to simulate button presses, a
 
 def push_to_display(line_one, line_two = ""): 
     print(f"{line_one}\n{line_two}")
+
+def lines():
+    print("//////////////////////////////////")
+
+def clear_screen():
+    # clears the screen
+    try:
+        # assuming we're running a linux/mac
+        os.system("clear")
+    except:
+        # we must be on windows
+        os.system("cls")
+
+        # honestly, there could be other errors that arise from this, but as far as try/except blocks go this is the least sinful one in this project
+
 
 def wait_for_button_press():
     '''
@@ -61,20 +64,9 @@ def list_menu(prompt = "", options = []):
             if option_selected < len(options) - 1:
                 option_selected += 1
 
-def int_menu(prompt = "", start_value = 0):
-    '''
-    Takes an unused starting value
 
-    Returns an integer value
-    '''
-
-    number_selected = start_value
-    while True:
-        push_to_display(prompt, f"<< {number_selected} >>")
-        button_pressed = int(input())
-        if button_pressed == 1:
-            number_selected -= 1
-        elif button_pressed == 3:
-            number_selected += 1
-        elif button_pressed == 2:
-            return number_selected
+def show_stat_screen(player_room, turns_left):
+    lines()
+    print("Room      : " + str(player_room))
+    print("Turns left: " + str(turns_left))
+    lines()

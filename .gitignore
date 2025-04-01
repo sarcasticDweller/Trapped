@@ -1,1 +1,4 @@
 OBSERVATIONS.md
+/__pycache__
+/ignore_me
+test.py
