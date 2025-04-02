@@ -19,7 +19,7 @@ Status meanings:
 """
 #Function declarations
 
-def place_entities_in_rooms():
+def place_entities_in_rooms(): # shitty, i know. to be rewritten
     player_room=map.rooms[math.floor((len(map.rooms)-1)/2)] # should always be the center of the map
     while True:
         loon_room=map.get_random_room()
@@ -40,6 +40,7 @@ def moveRoom():
 
 def detect_entity(reference, target):
     """
+    A wrapper for map.get_neighboring_objects_at_range()
     Return value meanings:
     0: same room
     1: 1 room away
@@ -58,7 +59,31 @@ def get_random_flavor_text():
     ]
     return random.choice(statements)
 
-def game_over(status):
+def print_debug_display():
+    # to rewrite
+    pass
+
+loon = Loon(random.choice(map.rooms))
+
+# state machine
+def intro_screen():
+    ttui.clear_screen()
+    ttui.lines()
+    print("Trapped")
+    ttui.lines()
+    answer = ttui.list_menu("Play?", ["Yes", "No"])
+    if answer == "Yes":
+        return True
+    else:
+        return False
+
+def game_loop(debug):
+    player_room, loon.room, bats_room = place_entities_in_rooms()
+
+    
+
+
+def game_over(status): 
     #Prints game-over messages
     ttui.clear_screen()
     if status==0:
@@ -74,28 +99,13 @@ def game_over(status):
     ttui.wait_for_button_press()
     ttui.clear_screen()
 
-def print_debug_display():
-    # to rewrite
-    pass
-
-loon = Loon(random.choice(map.rooms))
-
-# state machine
-def game_launch():
-    pass
-
 #Main loop
+flavor_text = ""
 while True:
     # intro screen
-    ttui.clear_screen()
-    ttui.lines()
-    print("Trapped")
-    ttui.lines()
-    answer = ttui.list_menu("Play?", ["Yes", "No"])
-    if answer == "No":
+    play_game_choice = intro_screen()
+    if not play_game_choice:
         quit()
-    if answer == "Yes":
-        ttui.clear_screen()
     
     # game setup
     player_room, loon.room, bats_room = place_entities_in_rooms()
@@ -104,39 +114,39 @@ while True:
         if debug==1:
             print_debug_display()
         
-        ttui.show_stat_screen(player_room, turns_left)
-
         # tell user about how close the loon is
         loon_distance = detect_entity(player_room, loon.room)
         if loon_distance == 0: # same room, end game
-            if loon_mood==moods[0]:
-                ttui.clear_screen()
+            if loon.mood == "cranky":
                 status=2
                 break
             else:
-                ttui.clear_screen()
                 status=3
                 break
         elif loon_distance == 1:
-            print("He's close.")
-            print("He sounds as if he's " + loon_mood + ".")
+            flavor_text = f"He's close.\nHe sounds as if he's {loon.mood}."
         elif loon_distance == 2:
-            print("You hear the loon.")
+            flavor_text = "You hear the loon."
         else:
-            print(get_random_flavor_text())
+            flavor_text = get_random_flavor_text()
         
         # bats & movement
         bats_distance = detect_entity(player_room, bats_room)
         if bats_distance == 0:
-            print("You've awakened the bats.")
+            # overrides previous flavor-text. should fix
+            flavor_text = "You've awakened the bats."
             player_room=map.get_random_room()
             bats_room=map.get_random_room()
-            print("You hear rustling.")
         elif bats_distance == 1:
-            print("You hear rustling.")
+            flavor_text = "You hear rustling."
         
         # logic to always run
-        moveRoom() # runs regardless of awakening the bats, which makes things a bit unclear. fix this!
+
+        # handle the player
+        options = map.get_directions_entity_can_move(player_room)
+        player_room_selected = ttui.show_ui(player_room, turns_left, flavor_text, options)
+        player_room = map.get_room_entity_moved_to(player_room, player_room_selected)
+
         loon.update()
         ttui.clear_screen()
         if turns_left<1:
