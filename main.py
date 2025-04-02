@@ -5,13 +5,6 @@ import ui as ttui
 from loon import Loon
 import map
 
-moods=["cranky", "mellow", "asleep"]
-
-choices=[] # possibly useless?
-
-# variable declarations
-player_room = 0
-bats_room = 0 
 #Variable declarations
 turns_left=50 #Default is 50
 debug = 0
@@ -27,11 +20,9 @@ Status meanings:
 #Function declarations
 
 def place_entities_in_rooms():
-    player_room=map.rooms[math.floor((len(map.rooms)-1)/2)] # should always be 12
-    print(player_room)
+    player_room=map.rooms[math.floor((len(map.rooms)-1)/2)] # should always be the center of the map
     while True:
         loon_room=map.get_random_room()
-        loon_room_prev = loon_room
         if loon_room!=player_room:
             break
     bats_room=map.get_random_room()
@@ -59,7 +50,6 @@ def detect_entity(reference, target):
     relative_location, distance = map.get_neighboring_objects_at_range(reference, target, detection_range)
     return distance
 
-
 def get_random_flavor_text():
     statements=["You know he's here somewhere...",
                 "He's not in this room.", 
@@ -67,7 +57,6 @@ def get_random_flavor_text():
                 "If I give up now I'll never escape."
     ]
     return random.choice(statements)
-
 
 def game_over(status):
     #Prints game-over messages
@@ -86,18 +75,15 @@ def game_over(status):
     ttui.clear_screen()
 
 def print_debug_display():
-    ttui.lines()
-    print("Debug Display")
-    print("Player room     : " + str(player_room))
-    print("Loon room       : " + str(loon_room))
-    print("Loon mood       : " + str(loon_mood))
-    print("Loon choices    : " + str(choices))
-    print("Turns not moving: " + str(turns_not_moving))
-    print("Bats room       : " + str(bats_room))
-    print("Status          : " + str(status))
-    ttui.lines()
+    # to rewrite
+    pass
 
 loon = Loon(random.choice(map.rooms))
+
+# state machine
+def game_launch():
+    pass
+
 #Main loop
 while True:
     # intro screen
@@ -113,8 +99,6 @@ while True:
     
     # game setup
     player_room, loon.room, bats_room = place_entities_in_rooms()
-    print(player_room)
-    print(loon.room)
     # game loop
     while True:
         if debug==1:
@@ -152,7 +136,7 @@ while True:
             print("You hear rustling.")
         
         # logic to always run
-        moveRoom() # runs regardless of awakening the bats, which makes things a bit unclear
+        moveRoom() # runs regardless of awakening the bats, which makes things a bit unclear. fix this!
         loon.update()
         ttui.clear_screen()
         if turns_left<1:
