@@ -79,9 +79,7 @@ def new_list_menu(options, option_selected):
     print(f"<< {options[option_selected]} >>")
     button_pressed = int(input())
     if button_pressed == enter:
-        if option_selected != left_end_cap_index and \
-            option_selected != right_end_cap_index:
-            option_to_return = options[option_selected]
+        option_to_return = options[option_selected]
     elif button_pressed == left:
         if option_selected > left_end_cap_index:
             option_selected -= 1
@@ -90,11 +88,6 @@ def new_list_menu(options, option_selected):
             option_selected += 1
     return (option_selected, option_to_return)
 
-def show_stat_screen(player_room, turns_left):
-    lines()
-    print("Room      : " + str(player_room))
-    print("Turns left: " + str(turns_left))
-    lines()
 
 def show_ui(player_room, turns_left, flavor_text, options):
     """
@@ -106,7 +99,7 @@ def show_ui(player_room, turns_left, flavor_text, options):
     while True:
         clear_screen()
         print("////////////////////")
-        print(f"Room        : {player_room}")
+        print(f"Room       : {player_room}")
         print(f"Turns left : {turns_left}")
         print("====================")
         print(flavor_text)
@@ -114,3 +107,21 @@ def show_ui(player_room, turns_left, flavor_text, options):
         option_cursor_on, direction_to_go = new_list_menu(options, option_cursor_on)
         if direction_to_go != None:
             return direction_to_go
+
+def show_start_screen(options):
+    """
+    This does two things:
+    1. Show's the user information
+    2. Take's user's input
+    """
+    option_cursor_on = 0
+    while True:
+        clear_screen()
+        print("////////////////////")
+        print("     Trapped")
+        print("====================")
+        print("  Play the game?")
+        print("////////////////////")
+        option_cursor_on, option_picked = new_list_menu(options, option_cursor_on)
+        if option_picked != None:
+            return option_picked

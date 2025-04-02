@@ -28,14 +28,6 @@ def place_entities_in_rooms(): # shitty, i know. to be rewritten
     bats_room=map.get_random_room()
     return player_room, loon_room, bats_room
 
-def moveRoom():
-    #Moves the player since it doesn't work well in the main loop
-    global player_room #Prevents an error. :/
-    #Because borders freak Python out this is here.
-
-    options = map.get_directions_entity_can_move(player_room)
-    direction_chosen = ttui.list_menu("Which way would you like to go?", options)
-    player_room = map.get_room_entity_moved_to(player_room, direction_chosen)
 
 
 def detect_entity(reference, target):
@@ -67,17 +59,13 @@ loon = Loon(random.choice(map.rooms))
 
 # state machine
 def intro_screen():
-    ttui.clear_screen()
-    ttui.lines()
-    print("Trapped")
-    ttui.lines()
-    answer = ttui.list_menu("Play?", ["Yes", "No"])
+    answer = ttui.show_start_screen(["Yes", "No"])
     if answer == "Yes":
         return True
     else:
         return False
 
-def game_loop(debug):
+def game_loop(debug = False):
     player_room, loon.room, bats_room = place_entities_in_rooms()
 
     
@@ -148,11 +136,9 @@ while True:
         player_room = map.get_room_entity_moved_to(player_room, player_room_selected)
 
         loon.update()
-        ttui.clear_screen()
         if turns_left<1:
             status=0
             break # end game
         else:
             turns_left -= 1
-    ttui.clear_screen()
     game_over(status)
