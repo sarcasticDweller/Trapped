@@ -93,6 +93,7 @@ while True:
     # intro screen
     play_game_choice = intro_screen()
     if not play_game_choice:
+        ttui.clear_screen()
         quit()
     
     # game setup
