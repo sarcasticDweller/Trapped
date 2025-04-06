@@ -44,10 +44,10 @@ def detect_entity(reference, target):
     return distance
 
 def get_random_flavor_text():
-    statements=["You know he's here somewhere...",
-                "He's not in this room.", 
-                "I will find him soon.",
-                "If I give up now I'll never escape."
+    statements=["You know he's here somewhere.... ",
+                "He's not in this room. ", 
+                "I will find him soon. ",
+                "If I give up now I'll never escape. "
     ]
     return random.choice(statements)
 
@@ -103,6 +103,8 @@ while True:
         if debug==1:
             print_debug_display()
         
+        flavor_text = "" # reset flavor text
+        
         # tell user about how close the loon is
         loon_distance = detect_entity(player_room, loon.room)
         if loon_distance == 0: # same room, end game
@@ -113,21 +115,25 @@ while True:
                 status=3
                 break
         elif loon_distance == 1:
-            flavor_text = f"He's close.\nHe sounds as if he's {loon.mood}."
+            flavor_text += f"He's close.\nHe sounds as if he's {loon.mood}. "
         elif loon_distance == 2:
-            flavor_text = "You hear the loon."
+            flavor_text += "You hear the loon. "
         else:
-            flavor_text = get_random_flavor_text()
+            flavor_text += get_random_flavor_text()
+        
+        # tell user if loon has been here
+        if player_room in loon.rooms_visited:
+            flavor_text += "You see feathers on the floor. "
         
         # bats & movement
         bats_distance = detect_entity(player_room, bats_room)
         if bats_distance == 0:
             # overrides previous flavor-text. should fix
-            flavor_text = "You've awakened the bats."
+            flavor_text += "You've awakened the bats. "
             player_room=map.get_random_room()
             bats_room=map.get_random_room()
         elif bats_distance == 1:
-            flavor_text = "You hear rustling."
+            flavor_text += "You hear rustling. "
         
         # logic to always run
 

@@ -13,10 +13,10 @@ class Loon:
         asleep: passive & immobile
         """
         self.room = room
-        self.room_previous = room
-        self.turns_not_moving = 0
-        self.turns_not_moving_max = 3
-    
+        self.room_previous = self.room
+        self.__turns_not_moving = 0
+        self.__turns_not_moving_max = 3
+        self.rooms_visited = [self.room] # add each room it visits to this, and then let the player know when they've been to a room visited
     def set_mood(self):
         # note: original code set this to go whenever the turns left was even. should create logic to do this every other turn
         self.mood = random.choice(self.moods)
@@ -26,10 +26,11 @@ class Loon:
         choices = map.get_directions_entity_can_move(self.room)
         room_picked = random.choice(choices)
         self.room = map.get_room_entity_moved_to(self.room, room_picked)
-        self.turns_not_moving = 0
+        self.rooms_visited.append(self.room)
+        self.__turns_not_moving = 0
 
     def nudge_if_sleeping_too_long(self):
-        if self.turns_not_moving >= self.turns_not_moving_max:
+        if self.__turns_not_moving >= self.__turns_not_moving_max:
             self.move_room()
     
     def update(self):
